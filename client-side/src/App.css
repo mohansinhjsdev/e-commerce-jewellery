@@ -1,0 +1,14 @@
+@import "tailwindcss";
+
+@import url('https://fonts.googleapis.com/css2?family=Playfair:ital,opsz,wght@0,5..1200,300..900;1,5..1200,300..900&family=Poppins:wght@300;400&display=swap');
+
+.navbar{
+    font-family: "Poppins",sans-serif;
+    font-size: 17px;
+    line-height: 26px;
+    text-transform: uppercase;
+    box-shadow: 0 8px 6px -6px gray;
+    --webkit-box-shadow:0 8px 6px -6px gray;
+    border-bottom: solid gray !important;
+}
+
