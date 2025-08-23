@@ -1,5 +1,6 @@
 import { useState,useContext,useEffect, createContext } from "react";
 
+
 const AuthContext = createContext()
 
 const AuthProvider = ({children}) =>{
@@ -17,8 +18,12 @@ const AuthProvider = ({children}) =>{
                 token:parseData.token,
             })
         }
-        // eslint-disable-next-lint
+        // eslint-disable-next-line
     },[])
+
+     // Whenever auth changes, update axios header
+
+
     return (
         <AuthContext.Provider value={[auth,setAuth]}>
             {children}
