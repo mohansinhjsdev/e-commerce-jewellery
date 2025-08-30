@@ -9,6 +9,7 @@ import productRoutes from "./routes/productRoutes.js"
 
 
 
+
 const app = express()
 dotenv.config()
 
@@ -17,6 +18,8 @@ app.use(cors({
     origin:"http://localhost:5173",
     credentials:true,
 }))
+
+app.use(express.urlencoded({ extended: true }));
 
 
 app.use(express.json())
@@ -31,6 +34,10 @@ const PORT = process.env.PORT || 5000
 
 app.use('/api/auth',authRoutes)
 app.use('/api/category', categoryRoutes)
+
+
+
+
 
 //route for live update
 app.use('/api/product',productRoutes)

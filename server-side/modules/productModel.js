@@ -22,15 +22,21 @@ const productSchema = new mongoose.Schema({
         type: String
     },
     image: {
-        type: Buffer,
-        contentType:String,
-    },
+        type:[String],
+        default:[]
+
+},
     shipping:{
         type:Boolean
     },
     inStock:{
         type:Boolean,
         default:true,
+    },
+    createdBy:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:"User",
+        required:true,
     }
 }, { timestamps: true });
 

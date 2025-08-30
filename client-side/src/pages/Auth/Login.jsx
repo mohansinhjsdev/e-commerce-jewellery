@@ -27,11 +27,13 @@ const handleSubmit = async (e)=>{
             user:res.data.user,
             token:res.data.token
         })
+
+        localStorage.setItem('auth',JSON.stringify(res.data))
+        navigate(location.state ||'/')
         
-        setTimeout(()=>{
-            localStorage.setItem('auth',JSON.stringify(res.data))
-            navigate(location.state ||'/')
-        },2000)
+        // setTimeout(()=>{
+            
+        // },2000)
     } else{
         toast.error(res.data.message)
     }

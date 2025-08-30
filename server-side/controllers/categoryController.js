@@ -1,4 +1,3 @@
-import slugify from "slugify";
 import categoryModel from "../modules/categoryModel.js";
 
 export const createCategoryController = async(req,res) =>{
@@ -8,15 +7,20 @@ export const createCategoryController = async(req,res) =>{
             return res.status(401).send({message:'Name is Required'})
         }
 
-        const existingCategory = await categoryModel.findOne({name})
+        const existingCategory = await categoryModel.findOne({
+            name:{$regex:`^${name}$`,$options:'i'},
+            createdBy:req.user._id})
         if(existingCategory){
-            return res.status(200).send({
-                success:true,
+            return res.status(400).send({
+                success:false,
                 message:"Category Already Exists"
             })
         }
 
-        const category = await new categoryModel({name,slug:slugify(name)}).save()
+        const category = await new categoryModel({
+            name,
+            createdBy:req.user._id
+        }).save()
         console.log("category",category)
 
         res.status(201).send({
@@ -61,12 +65,24 @@ export const updateCategoryController = async(req,res)=>{
 //get all categroy
 export const categroyController = async(req,res)=>{
     try {
-        const category = await categoryModel.find({})
+        const category = await categoryModel.find({createdBy:req.user._id})
+        console.log("catgory",category)
+
+        const uniqueCategories = []
+        const catgorySet = new Set();
+
+        category.forEach(cat =>{
+            if(!catgorySet.has(cat.name)){
+                catgorySet.add(cat.name);
+                uniqueCategories.push(cat)
+            }
+        })
+    
 
         res.status(200).send({
             success:true,
             message:"All Categories List",
-            category,
+            category:uniqueCategories,
         })
 
         
@@ -80,25 +96,71 @@ export const categroyController = async(req,res)=>{
     }
 }
 
-//single controller
-export const singleCategoryController = async(req,res)=>{
+// get all catgory for homepage
+
+export const getAllCatgoriesForHome = async(req,res) =>{
     try {
-        const category = await categoryModel.findOne({slug:req.params.slug})
-        console.log(category)
+        const categories = await categoryModel.find().select("name slug")
+
+        if(!categories || categories.length === 0){
+            return res.status(404).send({
+                success: false,
+                message: "No categories found"
+            });        
+        }
+
         res.status(200).send({
-            success:true,
-            message:"Get Single Category Successfully",
-            category
-        })
+            success: true,
+            message: "All categories fetched successfully",
+            count: categories.length,
+            categories
+        });
     } catch (error) {
-        console.log(error)
+        console.error("Error fetching category:", error.message);
         res.status(500).send({
-            success:false,
-            error,
-            message:'Error While getting single categories'
-        })
+            success: false,
+            message: "Error fetching category",
+            error: error.message
+        });
     }
 }
+
+//single controller
+export const singleCategoryController = async (req, res) => {
+    try {
+        const category = await categoryModel.findOne({ slug: req.params.slug });
+
+        if (!category) {
+            return res.status(404).send({
+                success: false,
+                message: "Category not found"
+            });
+        }
+
+        // authorization check: only creator admin can access
+        if (!category.createdBy.equals(req.user._id)) {
+            return res.status(403).send({
+                success: false,
+                message: "Unauthorized access to this category"
+            });
+        }
+
+        res.status(200).send({
+            success: true,
+            message: "Category fetched successfully",
+            category
+        });
+
+    } catch (error) {
+        console.error("Error fetching category:", error.message);
+        res.status(500).send({
+            success: false,
+            message: "Error fetching category",
+            error: error.message
+        });
+    }
+};
+
 
 //delete category
 export const deleteCategoryController = async (req,res) =>{
