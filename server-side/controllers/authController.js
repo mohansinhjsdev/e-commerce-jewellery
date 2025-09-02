@@ -133,3 +133,38 @@ export const testSign = (req,res)=>{
         res.send({error})
     }
 }
+
+
+//update profile
+export const updateProfileController = async(req,res)=>{
+    try {
+        const {name,email,password,number,address} = req.body;
+        const user = await userModel.findById(req.user._id)
+
+        //password
+        if(password && password.length < 6){
+            return res.json({error:"Password is required and 6 charcter long"})
+        }
+
+        const hashedPassword = password ? await hashPassword(password) : undefined
+
+        const updatedUser = await userModel.findByIdAndUpdate(req.user._id,{
+            name:name || user.name,
+            email:email || user.email,
+            password:hashedPassword || user.password,
+            number:number || user.number,
+            address:address || user.address
+        },{new:true})
+
+        res.status(200).send({
+            success:true,
+            message:"Update Susccesfully",
+            updatedUser,
+        })
+    } catch (error) {
+        console.log("Login Error",error)
+        res.status(500).json({
+            success:false,
+            message:"Error While updating password",error})
+    }
+}

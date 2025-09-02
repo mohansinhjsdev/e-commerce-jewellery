@@ -1,5 +1,5 @@
 import express from "express";
-import { createProduct, deleteProduct, getAllProducts, getAllProductsForHome, getSingleProduct, updateProduct, filterProductsController, productCountController, productListController} from "../controllers/productController.js";
+import { createProduct, deleteProduct, getAllProducts, getAllProductsForHome, getSingleProduct, updateProduct, filterProductsController, productCountController, productListController, searchProductController, productCategoryController} from "../controllers/productController.js";
 import { isAdmin, requireSign } from "../middleware/authMiddleware.js";
 import upload from "../middleware/multer.js";
 
@@ -31,6 +31,14 @@ router.get('/product-count',productCountController)
 
 //product per page
 router.get('/product-list/:page',productListController)
+
+//serch router
+router.get('/search/:keyword',searchProductController)
+
+
+//category wise product
+router.get('/product-category/:id',productCategoryController)
+
 
 
 export default router;

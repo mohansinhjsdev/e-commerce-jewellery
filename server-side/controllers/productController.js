@@ -2,11 +2,11 @@ import axios from "axios";
 import productModel from "../modules/productModel.js";
 import slugify from "slugify";
 import fs from "fs"
-
 import dotenv from 'dotenv'
 import { getPackedSettings } from "http2";
 import cloudinary from "../config/cloudinary.js";
 import streamifier from 'streamifier';
+import categoryModel from "../modules/categoryModel.js";
 
 dotenv.config()
 
@@ -250,6 +250,7 @@ export const getSingleProduct = async (req, res) => {
         const { id } = req.params;
 
         const product = await productModel.findById(id).populate('category');
+        console.log("product single",)
 
         if (!product) {
             return res.status(404).send({
@@ -259,12 +260,12 @@ export const getSingleProduct = async (req, res) => {
         }
 
         // authorization check: only creator admin can access
-        if (!product.createdBy.equals(req.user._id)) {
-            return res.status(403).send({
-                success: false,
-                message: "Unauthorized access to this product"
-            });
-        }
+        // if (!product.createdBy.equals(req.user._id)) {
+        //     return res.status(403).send({
+        //         success: false,
+        //         message: "Unauthorized access to this product"
+        //     });
+        // }
 
         const goldPricePerGram = await getGoldPricePerGram();
         if (!goldPricePerGram) {
@@ -283,8 +284,8 @@ export const getSingleProduct = async (req, res) => {
             success: true,
             product: {
                 ...product.toObject(),
-                finalPrice: finalPrice.toFixed(2),
-                goldPricePerGram: goldPricePerGram.toFixed(2)
+                finalPrice: finalPrice.toLocaleString('en-IN',{style:'currency',currency:"INR"}),
+                goldPricePerGram: goldPricePerGram.toLocaleString('en-IN',{style:'currency',currency:"INR"})
             }
         });
 
@@ -379,31 +380,41 @@ export const deleteProduct =async (req,res)=>{
 }
 
 //filters
-
-export const filterProductsController = async(req,res)=>{
+export const filterProductsController = async (req, res) => {
     try {
-        const {checked,radio} = req.body;
-        console.log("checked catgories",checked)
-        console.log("Price range:", radio);
-        let args = {}
-        if(checked.length > 0) args.category = checked
-        if(radio.length) args.finalPrice = {$gte:radio[0],$lte:radio[1]}
+        const { checked, radio } = req.body;
+        let args = {};
 
-        const products = await productModel.find(args).populate('category')
+        if (checked.length > 0) args.category = { $in: checked }; // fix $in
+        if (radio.length) args.finalPrice = { $gte: radio[0], $lte: radio[1] };
+
+        let products = await productModel.find(args).populate('category');
+
+        const goldPricePerGram = await getGoldPricePerGram();
+        products = products.map(product => {
+            const weight = product.weight || 0;
+            const makingCharge = product.makingCharge || 0;
+            const finalPrice = weight * goldPricePerGram + makingCharge;
+            return {
+                ...product._doc,
+                finalPrice: finalPrice.toLocaleString('en-IN', { style: 'currency', currency: 'INR' })
+            };
+        });
 
         res.status(200).send({
-            success:true,
+            success: true,
             products,
-        })
+        });
     } catch (error) {
-        console.log(error)
+        console.log(error);
         res.status(500).send({
             success: false,
-            message: "Error filter product",
+            message: "Error filtering products",
             error: error.message
         });
     }
-}
+};
+
 
 //product count
 export const productCountController = async(req,res)=>{
@@ -446,3 +457,65 @@ export const productListController = async(req,res)=>{
         });
     }
 }
+
+//search product
+export const searchProductController = async(req,res)=>{
+    try {
+        const {keyword} = req.params;
+        const results = await productModel.find({
+            $or:[
+                {name:{$regex: keyword, $options:"i"}},
+                {description:{$regex: keyword, $options:"i"}}
+            ]
+        }).select("-photo")
+
+        res.json(results)
+    } catch (error) {
+        res.status(500).send({
+            success: false,
+            message: "Failed to Search",
+            error: error.message
+        });
+    }
+}
+
+// get product by category
+export const productCategoryController = async (req, res) => {
+    try {
+        const categoryId = req.params.id;
+
+        const category = await categoryModel.findById(categoryId);
+        if (!category) {
+            return res.status(404).send({
+                success: false,
+                message: "Category Not found"
+            });
+        }
+
+        let products = await productModel.find({ category: categoryId }).populate('category');
+
+        const goldPricePerGram = await getGoldPricePerGram();
+        products = products.map(product => {
+            const weight = product.weight || 0;
+            const makingCharge = product.makingCharge || 0;
+            const finalPrice = weight * goldPricePerGram + makingCharge;
+            return {
+                ...product._doc,
+                finalPrice: finalPrice.toLocaleString('en-IN', { style: 'currency', currency: 'INR' })
+            };
+        });
+
+        res.status(200).send({
+            success: true,
+            category,
+            products
+        });
+    } catch (error) {
+        res.status(500).send({
+            success: false,
+            message: "Failed to fetch category products",
+            error: error.message
+        });
+    }
+};
+
