@@ -229,7 +229,7 @@ const Navbar = () => {
                     {categories.map((c) => (
                       <li key={c._id}>
                         <NavLink
-                          to={`/category/${c._id}`}
+                           to={`/category/${c._id}`}
                           onClick={() => setIsMenuOpen(false)}
                           className="block hover:text-yellow-600"
                         >

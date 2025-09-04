@@ -110,7 +110,7 @@ const HomePage = () => {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             {/* Sidebar */}
-            <div className="bg-white shadow-lg rounded-xl p-5">
+            <div className="bg-white shadow-lg rounded-xl p-5 md:sticky md:top-20 h-fit self-start">
               <h5 className="text-xl font-bold mb-4 border-b pb-2">Filter By Category</h5>
               <div className="flex flex-col gap-3 mb-6">
                 {categories?.map((c) => (
@@ -124,7 +124,7 @@ const HomePage = () => {
                 ))}
               </div>
 
-              <h5 className="text-xl font-bold mb-4 border-b pb-2">Filter By Price</h5>
+              {/* <h5 className="text-xl font-bold mb-4 border-b pb-2">Filter By Price</h5>
               <Radio.Group
                 className="flex flex-col gap-3"
                 onChange={(e) => setRadio(e.target.value)}
@@ -135,7 +135,7 @@ const HomePage = () => {
                     <span className="text-gray-700 font-medium">{p.name}</span>
                   </Radio>
                 ))}
-              </Radio.Group>
+              </Radio.Group> */}
 
               {(checked.length > 0 || radio.length > 0) && (
                 <button

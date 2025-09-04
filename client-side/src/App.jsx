@@ -24,9 +24,7 @@ import ProductDetails from "./pages/productdetails/ProductDetails";
 import Categories from "./pages/Categories";
 import CategoryProduct from "./pages/CategoryProduct";
 import CartPage from "./pages/CartPage";
-
-
-
+import OrderSuccess from "./pages/user/OrderSuccess";
 
 function App() {
   return (
@@ -38,11 +36,14 @@ function App() {
         <Route path="categories" element={<Categories/>} />
         <Route path="category/:id" element={<CategoryProduct/>} />
         <Route path="cart-page" element={<CartPage/>} />
+        <Route path="/orders-success" element={<OrderSuccess/>}/>
 
+      //user routes
         <Route path="/dashboard" element={<PrivateRoute />}>
           <Route path="user" element={<Dashboard />} />
           <Route path="user/profile" element={<Profile/>}/>
           <Route path="user/orders" element={<Order/>}/>
+         
           
         </Route>
         <Route path="/dashboard" element={<AdminRoutes />}>

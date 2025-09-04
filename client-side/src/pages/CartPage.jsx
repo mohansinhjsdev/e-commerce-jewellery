@@ -1,16 +1,21 @@
-import React from "react";
+import React, { useState } from "react";
 import Layout from "../components/Layout/Layout";
 import { useCart } from "../context/Cart";
 import { useAuth } from "../context/Auth";
 import { useNavigate } from "react-router-dom";
 import { MdDeleteForever } from "react-icons/md";
 import { toast } from "react-toastify";
+import { Modal } from "antd";
 
 const CartPage = () => {
   const [cart, setCart] = useCart();
   console.log("cart", cart);
   const [auth] = useAuth();
   const navigate = useNavigate();
+
+  //modal stats
+  const [visible,setVisible]=useState(false)
+  const [phone,setPhone] = useState("")
 
   const removeItem = (id) => {
     try {
@@ -23,6 +28,17 @@ const CartPage = () => {
       console.log(error);
     }
   };
+
+  //handle Payment Success
+  const handlePayment=()=>{
+    if(!phone || phone.length < 10){
+      toast.error("Please Enter a valid phone Number")
+      return ;
+    }
+    setVisible(false)
+    toast.success("Payment Success")
+    navigate('/orders-success')
+  }
 
   return (
     <Layout title={"Cart Page"}>
@@ -161,19 +177,34 @@ const CartPage = () => {
               disabled={
                 cart.length === 0 || !auth?.token || !auth?.user?.address
               }
-              onClick={() => toast("Proceeding to payment...")}
+              onClick={() => setVisible(true)}
               className={`w-full py-3 font-semibold rounded-lg transition ${
                 cart.length === 0 || !auth?.token || !auth?.user?.address
                   ? "bg-gray-300 text-gray-500 cursor-not-allowed"
                   : "bg-green-500 text-white hover:bg-green-600"
               }`}
             >
-              Proceed to Payment
+              Confirm Payment
             </button>
             </div>
           </div>
         </div>
-      </div>
+      </div>  
+      {/* Payment Model */}
+      <Modal
+      title="Enter Your Phone Number"
+      visible={visible}
+      onCancel={()=>setVisible(false)}
+      onOk={handlePayment}
+      okText="Pay Now"
+      >
+        <input 
+        placeholder="Enter Your Number"
+        value={phone}
+        maxLength={10}
+        onChange={(e)=>setPhone(e.target.value)}
+         />
+      </Modal>
     </Layout>
   );
 };

@@ -8,8 +8,6 @@ import cors from "cors"
 import productRoutes from "./routes/productRoutes.js"
 
 
-
-
 const app = express()
 dotenv.config()
 
@@ -36,11 +34,10 @@ app.use('/api/auth',authRoutes)
 app.use('/api/category', categoryRoutes)
 
 
-
-
-
 //route for live update
 app.use('/api/product',productRoutes)
+
+
 
 
 //rest api
