@@ -13,9 +13,9 @@ dotenv.config()
 
 //middelwares
 app.use(cors({
-    origin: ["http://localhost:5173", "https://e-commerce-jewellery-production.up.railway.app"],
-    credentials: true,
-  }))
+    origin: "https://e-commerce-jewellery-78q6.onrender.com", // frontend ka URL
+    credentials: true, 
+}));
 
 app.use(express.urlencoded({ extended: true }));
 
